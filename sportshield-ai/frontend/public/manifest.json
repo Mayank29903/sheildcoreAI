@@ -1,0 +1,18 @@
+{
+  "name": "SportShield AI",
+  "short_name": "SportShield",
+  "description": "Real-Time Digital Asset Intelligence for Sports Media",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#020408",
+  "theme_color": "#00d4aa",
+  "categories": ["utilities","productivity"],
+  "icons": [
+    {"src":"/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ],
+  "shortcuts": [
+    {"name":"Scan Content","url":"/scan","description":"Scan media for authenticity"},
+    {"name":"View Violations","url":"/violations","description":"View detected violations"}
+  ]
+}

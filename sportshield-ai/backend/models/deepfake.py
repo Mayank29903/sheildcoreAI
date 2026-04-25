@@ -1,0 +1,180 @@
+# SportShield AI | Google Solution Challenge 2026 | First Prize Target
+
+"""
+WHY: Orchestrates AI inference for deepfake detection. Pre-loads models 
+on startup to avoid 90-second cold start delays, enabling a sub-3-second 
+response time critical for live hackathon demos.
+"""
+
+import os
+import cv2
+import asyncio
+import numpy as np
+import tempfile
+from PIL import Image
+from transformers import pipeline
+from concurrent.futures import ThreadPoolExecutor
+
+MODEL_ID = 'dima806/deepfake_vs_real_image_detection'
+
+# Module-level globals
+_detector = None
+_executor = ThreadPoolExecutor(max_workers=2)
+
+async def preload_deepfake_model():
+    """
+    WHY: Pre-loading at startup ensures 3-second demo response.
+    Loading on first request = 90-second delay = demo dies on stage.
+    Model is loaded from Docker layer cache, not downloaded at runtime.
+    """
+    global _detector
+    if _detector is None:
+        loop = asyncio.get_event_loop()
+        _detector = await loop.run_in_executor(
+            _executor,
+            lambda: pipeline('image-classification', model=MODEL_ID)
+        )
+
+def _run_single_inference(image_path: str) -> dict:
+    """
+    WHY: Synchronous CPU-bound inference run within a ThreadPoolExecutor.
+    Generates genuine AI scores ensuring zero fake numbers are shown.
+    """
+    try:
+        if _detector is None:
+            return {
+                'is_fake': False, 'confidence': 0.0, 
+                'verdict': 'ANALYSIS_ERROR: Model not loaded', 
+                'risk_label': 'UNKNOWN', 'frames_analyzed': 0
+            }
+            
+        img = Image.open(image_path).convert('RGB')
+        results = _detector(img)
+        
+        # Parse the HuggingFace zero-shot classification output sequence
+        fake_score = 0.0
+        for res in results:
+            if 'fake' in res['label'].lower():
+                fake_score = res['score']
+                break
+                
+        is_fake = fake_score > 0.5
+        real_score = 1.0 - fake_score
+        confidence = round(fake_score * 100 if is_fake else real_score * 100, 2)
+        
+        if confidence > 90 and is_fake:
+            risk_label = 'CRITICAL'
+        elif confidence > 70 and is_fake:
+            risk_label = 'HIGH'
+        elif confidence > 50 and is_fake:
+            risk_label = 'MEDIUM'
+        else:
+            risk_label = 'LOW'
+            
+        verdict = "DEEPFAKE DETECTED" if is_fake else "AUTHENTIC CONTENT"
+        
+        return {
+            'is_fake': is_fake,
+            'confidence': confidence,
+            'verdict': verdict,
+            'risk_label': risk_label,
+            'frames_analyzed': 1
+        }
+    except Exception as e:
+        return {
+            'is_fake': False, 
+            'confidence': 0.0,
+            'verdict': f'ANALYSIS_ERROR: {str(e)}', 
+            'risk_label': 'UNKNOWN', 
+            'frames_analyzed': 0
+        }
+
+async def detect_deepfake(image_path: str) -> dict:
+    """
+    WHY: Async wrapper so FastAPI routes don't block the event loop.
+    CPU inference runs in ThreadPoolExecutor to avoid blocking.
+    """
+    loop = asyncio.get_event_loop()
+    result = await loop.run_in_executor(_executor, _run_single_inference, image_path)
+    result['duration_seconds'] = None
+    return result
+
+async def detect_deepfake_video(video_path: str) -> dict:
+    """
+    WHY: Sample 16 frames with np.linspace for temporal coverage.
+    Averaging across frames reduces false positives from single bad frames.
+    """
+    try:
+        cap = cv2.VideoCapture(video_path)
+        if not cap.isOpened():
+            raise ValueError("Could not open video file")
+            
+        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        if total_frames <= 0:
+            raise ValueError("No frames found or unsupported format")
+            
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        if fps <= 0: fps = 30.0
+        duration_seconds = total_frames / fps
+        
+        frame_indices = np.linspace(0, total_frames - 1, min(16, total_frames), dtype=int)
+        
+        temp_dir = tempfile.gettempdir()
+        analyzed = []
+        
+        for idx in frame_indices:
+            cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
+            ret, frame = cap.read()
+            if not ret:
+                continue
+                
+            temp_frame_path = os.path.join(temp_dir, f"frame_{idx}.jpg")
+            cv2.imwrite(temp_frame_path, frame)
+            
+            res = _run_single_inference(temp_frame_path)
+            analyzed.append(res)
+            
+            try:
+                os.remove(temp_frame_path)
+            except OSError:
+                pass
+                
+        cap.release()
+        
+        if not analyzed:
+            raise ValueError("Could not extract any valid frames for analysis")
+            
+        avg_fake_score_pct = sum([r['confidence'] if r['is_fake'] else (100 - r['confidence']) for r in analyzed]) / len(analyzed)
+        
+        is_fake = avg_fake_score_pct > 50.0
+        confidence = round(avg_fake_score_pct if is_fake else (100 - avg_fake_score_pct), 2)
+        
+        if confidence > 90 and is_fake:
+            risk_label = 'CRITICAL'
+        elif confidence > 70 and is_fake:
+            risk_label = 'HIGH'
+        elif confidence > 50 and is_fake:
+            risk_label = 'MEDIUM'
+        else:
+            risk_label = 'LOW'
+            
+        verdict = "DEEPFAKE DETECTED" if is_fake else "AUTHENTIC CONTENT"
+        
+        return {
+            'is_fake': is_fake,
+            'confidence': confidence,
+            'verdict': verdict,
+            'risk_label': risk_label,
+            'frames_analyzed': len(analyzed),
+            'duration_seconds': round(duration_seconds, 2)
+        }
+        
+    except Exception as e:
+        return {
+            'is_fake': False,
+            'confidence': 0.0,
+            'verdict': f'ANALYSIS_ERROR: {str(e)}',
+            'risk_label': 'UNKNOWN',
+            'frames_analyzed': 0,
+            'duration_seconds': None
+        }
