@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithPopup, signOut, GoogleAuthProvider } from 'firebase/auth';
+import { getAuth, signInWithPopup, signOut, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import {
   getFirestore,
   collection,
@@ -192,6 +192,33 @@ export const signInWithGoogle = async () => {
 
   try {
     const result = await signInWithPopup(getAuthInstance(), getGoogleProvider());
+    const user = serializeUser(result.user);
+    emitAuthChange(user);
+    return { user };
+  } catch (error) {
+    throw normalizeAuthError(error);
+  }
+};
+
+export const registerWithEmail = async (email, password, displayName) => {
+  await ensureFirebaseAuthConfigured();
+  try {
+    const result = await createUserWithEmailAndPassword(getAuthInstance(), email, password);
+    const user = serializeUser(result.user);
+    if (displayName) {
+      user.displayName = displayName;
+    }
+    emitAuthChange(user);
+    return { user };
+  } catch (error) {
+    throw normalizeAuthError(error);
+  }
+};
+
+export const signInWithEmail = async (email, password) => {
+  await ensureFirebaseAuthConfigured();
+  try {
+    const result = await signInWithEmailAndPassword(getAuthInstance(), email, password);
     const user = serializeUser(result.user);
     emitAuthChange(user);
     return { user };

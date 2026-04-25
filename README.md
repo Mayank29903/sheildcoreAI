@@ -1,122 +1,296 @@
-# SportShield AI - Google Solution Challenge 2026 🛡️
+# ShieldCoreAI - Complete Setup Guide
 
-**SportShield AI** is a real-time sports media rights intelligence platform targeting the Google Solution Challenge 2026. It protects intellectual property for sports organizations and athletes through cryptographic digital watermarking, real-time web scraping, generative AI forensics, and immutable blockchain-like ledger storage securely utilizing Google Firebase.
-
-This guide is written specifically to teach you **step-by-step** how the application gets built, configured, and deployed. Learn each part so you can maintain it yourself!
+Everything needed to make `sportshield-ai` work from zero.
 
 ---
 
-## 📚 Table of Contents
-1. [Architecture Overview](#architecture-overview)
-2. [Step 1: Setting up Firebase & Google Cloud](#step-1-setting-up-firebase--google-cloud)
-3. [Step 2: Connecting the Backend](#step-2-connecting-the-backend)
-4. [Step 3: Connecting the Frontend](#step-3-connecting-the-frontend)
-5. [Step 4: Running the Demo locally](#step-4-running-the-demo-locally)
-6. [Pre-Flight and Demo Scripts](#pre-flight-and-demo-scripts)
+## Part 1 - Firebase Console Setup
 
----
+Go to: https://console.firebase.google.com
 
-## 🏗️ Architecture Overview
+Select your project: `sheildcoreai`
 
-The platform uses a decoupled frontend/backend architecture ensuring high scalability:
+### 1. Enable Google Authentication
 
-- **Frontend:** React 18, Vite, Tailwind v4 (CSS Native Variables), and Framer Motion for animations. It communicates with Firebase directly for auth and live database feeds to get under 100ms lag.
-- **Backend:** FastAPI (Python), orchestrated alongside deep learning models (HuggingFace Deepfake detector, Gemini 2.0 Flash vision, pHash perception, Steganography).
-- **Core Strategy:** The backend performs heavy AI manipulation and data checks, while Firebase Realtime DB triggers instantaneous UI flashes on the frontend without needing polling calls.
+- Authentication -> Sign-in method -> Google -> Enable -> Save
+- Authentication -> Settings -> Authorized domains -> Add `localhost`
 
----
+### 2. Create Firestore Database
 
-## 🚀 Step 1: Setting up Firebase & Google Cloud
-*Why? You need a database to store ownership certificates, images, and user authentication!*
+- Firestore Database -> Create database
+- Choose `Start in test mode`
+- Region: `asia-south1`
 
-### Firebase Setup (New Console UI)
-1. Go to the [Firebase Console](https://console.firebase.google.com/) and create a new project.
-2. In the left sidebar under **Product categories**, click **Databases & Storage**.
-3. Create a **Firestore Database** (Start in Production Mode).
-4. Create a **Realtime Database** (Start in Test Mode).
-5. Create **Storage** (Start in Production Mode).
-6. Click **Security**, then **Authentication**. Click "Get Started", select "Google", and enable it.
+This also enables the Firestore API.
 
-### Getting the "Secret Keys"
-To connect your backend securely to Firebase, you need a Service Account Key.
-1. Click the **Settings (Gear Icon ⚙️)** at the top left > **Service accounts**.
-2. Click **Generate new private key**. This downloads a `.json` file.
-3. Keep this safe! Place it in your `backend` folder and rename it to `serviceAccountKey.json`.
-4. Run `base64 -w 0 serviceAccountKey.json > base64.txt` (Linux/WSL) or `certutil -encode serviceAccountKey.json tmp.b64` (Windows) to encode it if you decide to deploy to Cloud Run!
+### 3. Create Storage Bucket
 
-### Google Cloud APIs
-1. Go to the GCP Console and search for **Gemini API**. Get a free Gemini 2.0 Flash API key.
-2. Search for the **Programmable Search Engine** (CSE) to allow web crawling.
-3. Save these keys for your `.env` configuration!
+- Storage -> Get Started
+- Choose `Start in test mode`
+- Region: `asia-south1`
 
----
+This creates the bucket `sheildcoreai.appspot.com`.
 
-## 🛠️ Step 2: Connecting the Backend
-*Why? The backend is where all the forensic AI checks happen.*
+### 4. Enable Realtime Database
 
-1. Open your terminal and navigate to the backend folder:
-   ```bash
-   cd backend
-   ```
-2. Create your local environment setup:
-   Copy `.env.example` into a new file called `.env`.
-   Fill out the `GEMINI_API_KEY`, `FIREBASE_PROJECT_ID`, and path to your `FIREBASE_CREDENTIALS_JSON`.
-3. Install dependencies using Python:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. Run your development server:
-   ```bash
-   python main.py
-   ```
-   *Your server is now active on `http://localhost:8000`*
+- Realtime Database -> Create database
+- Choose `Test mode`
+- Region: `us-central1`
 
----
+Expected URL:
 
-## 💻 Step 3: Connecting the Frontend
-*Why? The frontend is what the judges will see!*
-
-1. Open a new terminal and navigate to the frontend folder:
-   ```bash
-   cd frontend
-   ```
-2. Create your frontend `.env`:
-   Copy `.env.example` to `.env`.
-   Go back to Firebase Settings -> General -> Add Web App. Copy the `firebaseConfig` keys they give you into your `.env` file!
-3. Install UI packages and modules:
-   ```bash
-   npm install
-   ```
-4. Start your local React application:
-   ```bash
-   npm run dev
-   ```
-
----
-
-## 🎭 Step 4: Running the Demo locally
-
-Once both are running, open your browser to `http://localhost:5173`.
-Start the flow:
-1. Click **Authenticate Operator**. This connects you with Google Firebase.
-2. You will be redirected to the **Dashboard** which serves as Mission Control.
-3. Go to **Register Asset** to upload a legitimate sports image (Must be a PNG!). This writes the LSB watermark into the deepest layers of the pixels!
-4. Go to **Scan Content** and upload a cropped version of that image. Watch the radar tick as it pulls the watermark and verifies EXIF manipulations.
-
----
-
-## 📋 Pre-Flight and Demo Scripts
-Before stepping on stage, test the forensic pipeline locally.
-Open the command line to verify your Python environment holds the Steganography weights:
-
-**Watermark Survival Test:**
-```python
-from stegano import lsb; from PIL import Image; import json
-img = Image.new('RGB',(200,200),'navy'); img.save('test.png')
-secret = lsb.hide('test.png', json.dumps({'cert_id':'TEST1234'}))
-secret.save('test_wm.png')
-print('WATERMARK:', json.loads(lsb.reveal('test_wm.png')))
+```text
+https://sheildcoreai-default-rtdb.firebaseio.com
 ```
 
-### ✨ Good luck building and presenting! 
-If you encounter errors like `React.Suspense` crashing, ensure your React version is strictly `^18.3.0` and that all your Firebase config variables are properly filled out!
+### 5. Download Service Account Key
+
+- Project Settings -> Service Accounts
+- Click `Generate new private key`
+- Download the JSON
+- Rename it to `serviceAccountKey.json`
+- Put it in `sportshield-ai/backend/`
+
+### 6. Get Web App Config
+
+- Project Settings -> General
+- Scroll to `Your apps`
+- Open your web app, or create one if needed
+- Copy the values from the `Config` view
+
+---
+
+## Part 2 - Create Your Env Files
+
+### `sportshield-ai/backend/.env`
+
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+FIREBASE_PROJECT_ID=sheildcoreai
+FIREBASE_CREDENTIALS_JSON=./serviceAccountKey.json
+GOOGLE_CSE_KEY=
+GOOGLE_CSE_CX=
+SENDGRID_API_KEY=
+SENDGRID_FROM_EMAIL=
+DEMO_MODE=true
+PORT=8000
+```
+
+Get a Gemini API key at:
+https://aistudio.google.com
+
+### `sportshield-ai/frontend/.env`
+
+```env
+VITE_API_URL=http://localhost:8000
+VITE_FIREBASE_API_KEY=paste_from_firebase_console
+VITE_FIREBASE_AUTH_DOMAIN=sheildcoreai.firebaseapp.com
+VITE_FIREBASE_DATABASE_URL=https://sheildcoreai-default-rtdb.firebaseio.com
+VITE_FIREBASE_PROJECT_ID=sheildcoreai
+VITE_FIREBASE_STORAGE_BUCKET=sheildcoreai.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=paste_from_firebase_console
+VITE_FIREBASE_APP_ID=paste_from_firebase_console
+```
+
+---
+
+## Part 3 - Firebase Rules For Local Testing
+
+### Storage Rules
+
+Replace Storage Rules with:
+
+```text
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if true;
+    }
+  }
+}
+```
+
+### Firestore Rules
+
+Replace Firestore Rules with:
+
+```text
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
+```
+
+These rules are only appropriate for local testing and demos.
+
+---
+
+## Part 4 - Critical Backend Fix
+
+The scan route should not upload to Storage before returning the initial response.
+
+This repo already includes that fix in:
+
+```text
+sportshield-ai/backend/routes/scan.py
+```
+
+Behavior now:
+
+- the API returns `scan_id` immediately
+- file upload happens inside the background scan task
+- scan processing continues even if Storage upload fails
+
+---
+
+## Part 5 - Fix PyTorch On Windows
+
+If Torch is broken on Windows, reinstall the CPU wheels:
+
+```bash
+cd sportshield-ai/backend
+pip uninstall torch torchvision -y
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+```
+
+If Torch still fails, the backend will continue running and deepfake detection will stay disabled until the dependency issue is resolved.
+
+---
+
+## Part 6 - Run The Project
+
+### Terminal 1 - Backend
+
+```bash
+cd sportshield-ai/backend
+pip install -r requirements.txt
+python main.py
+```
+
+Expected backend log highlights:
+
+- `Firebase Admin Initialized Successfully`
+- either deepfake model loaded, or deepfake skipped with a warning
+
+### Terminal 2 - Seed Demo Data
+
+```bash
+cd sportshield-ai/backend
+python seed_demo_data.py
+```
+
+Expected output:
+
+```text
+DEMO DATA SEEDED SUCCESSFULLY
+```
+
+### Terminal 3 - Frontend
+
+```bash
+cd sportshield-ai/frontend
+npm install
+npm run dev
+```
+
+Open:
+
+```text
+http://localhost:5173
+```
+
+---
+
+## Part 7 - Deepfake Model Integration
+
+The project already supports a Hugging Face model in:
+
+```text
+sportshield-ai/backend/models/deepfake.py
+```
+
+Current default:
+
+```python
+MODEL_ID = 'dima806/deepfake_vs_real_image_detection'
+```
+
+### Option A - Use Your Hugging Face Model
+
+Change:
+
+```python
+MODEL_ID = 'your-username/your-model-name'
+```
+
+### Option B - Use Your Local PyTorch `.pt` Or `.pth` Model
+
+Replace `models/deepfake.py` with a local-model implementation and point `MODEL_PATH` to your file in `backend/models/`.
+
+### Option C - Use Your Keras `.h5` Model
+
+Load the model with TensorFlow in `models/deepfake.py` and adapt preprocessing/inference to your trained architecture.
+
+---
+
+## Part 8 - Gemini Integration
+
+Gemini is already wired in:
+
+```text
+sportshield-ai/backend/services/gemini.py
+```
+
+Once `GEMINI_API_KEY` is set, these features become available:
+
+- image manipulation analysis
+- legal report generation
+- multilingual report output
+
+For video support and scan-result chat, extend:
+
+```text
+sportshield-ai/backend/routes/scan.py
+```
+
+---
+
+## Part 9 - Final Checklist
+
+- [ ] `sportshield-ai/backend/.env` exists
+- [ ] `sportshield-ai/frontend/.env` exists
+- [ ] `sportshield-ai/backend/serviceAccountKey.json` exists
+- [ ] Firestore is enabled
+- [ ] Storage is enabled
+- [ ] Realtime Database is enabled
+- [ ] Google Auth is enabled
+- [ ] `localhost` is in Firebase authorized domains
+- [ ] Firestore rules allow local testing
+- [ ] Storage rules allow local testing
+- [ ] `python main.py` starts successfully
+- [ ] `python seed_demo_data.py` succeeds
+- [ ] `npm run dev` starts successfully
+- [ ] Google sign-in works, or local preview is used until Firebase Auth is configured
+
+---
+
+## Quick Reference
+
+| Key | Where to get it | What breaks without it |
+| --- | --- | --- |
+| `GEMINI_API_KEY` | Google AI Studio | Gemini analysis and legal reports |
+| `FIREBASE_PROJECT_ID` | Firebase Project Settings | Backend Firebase integrations |
+| `FIREBASE_CREDENTIALS_JSON` | Service account JSON path | Backend Firebase Admin init |
+| `VITE_FIREBASE_API_KEY` | Firebase web app config | Frontend Firebase access |
+| `VITE_FIREBASE_AUTH_DOMAIN` | Firebase web app config | Google sign-in |
+| `VITE_FIREBASE_DATABASE_URL` | Realtime Database | Live feed and dashboard stats |
+| `VITE_FIREBASE_STORAGE_BUCKET` | Firebase web app config | Frontend storage references |
+
+---
+
+Generated for ShieldCoreAI / `sportshield-ai`.

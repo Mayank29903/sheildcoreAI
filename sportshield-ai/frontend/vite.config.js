@@ -4,7 +4,13 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  server: { port: 5173, host: true },
+  server: { 
+    port: 5173, 
+    host: true,
+    headers: {
+      "Cross-Origin-Opener-Policy": "same-origin-allow-popups"
+    }
+  },
   build: {
     outDir: 'dist',
     sourcemap: false,

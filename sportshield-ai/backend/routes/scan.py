@@ -69,14 +69,21 @@ async def scan_content(request: Request, background_tasks: BackgroundTasks, file
     
     with open(tmp_path, 'wb') as f:
         f.write(content)
-        
-    file_url = upload_to_storage(tmp_path, f"scans/{scan_id}/upload{ext}")
-    background_tasks.add_task(_process_scan, request.app, scan_id, tmp_path, user_uid, language, file.filename, file.content_type, len(content), file_url)
+
+    background_tasks.add_task(_process_scan, request.app, scan_id, tmp_path, user_uid, language, file.filename, file.content_type, len(content))
     return {'scan_id': scan_id, 'status': 'processing'}
 
-async def _process_scan(app, scan_id, temp_path, user_uid, language, file_name, mime_type, file_size, file_url):
+async def _process_scan(app, scan_id, temp_path, user_uid, language, file_name, mime_type, file_size):
     db, rtdb, loop = get_firestore(), get_rtdb(), asyncio.get_event_loop()
     is_vid = mime_type.startswith('video/')
+
+    try:
+        ext = os.path.splitext(temp_path)[1] or '.bin'
+        file_url = upload_to_storage(temp_path, f"scans/{scan_id}/upload{ext}")
+    except Exception as e:
+        logger.warning(f"Storage upload failed (continuing scan): {e}")
+        file_url = None
+
     try:
         # Step 1
         df = await run_step_with_timeout(detect_deepfake_video(temp_path) if is_vid else detect_deepfake(temp_path), 30, 'deepfake')

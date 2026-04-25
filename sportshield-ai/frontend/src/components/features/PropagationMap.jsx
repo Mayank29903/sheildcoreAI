@@ -22,7 +22,7 @@ function InnerMap({ violations = [] }) {
         <MapContainer center={center} zoom={2} style={{ height: '100%', width: '100%' }} zoomControl={false} scrollWheelZoom={false}>
           <TileLayer
             attribution='&copy; OpenStreetMap'
-            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           {data.map((v, i) => (
             <CircleMarker key={i} center={[v.geo_lat, v.geo_lng]} radius={8} pathOptions={{ color: 'var(--color-threat)', fillColor: 'var(--color-threat)', fillOpacity: 0.5, weight: 2 }} className="pulse-threat">
