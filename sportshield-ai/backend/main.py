@@ -22,6 +22,7 @@ from routes.violations import router as violations_router
 from routes.analytics import router as analytics_router
 from routes.crawl import router as crawl_router
 from routes.evidence import router as evidence_router
+from routes.assets import router as assets_router
 
 _dashboard_sockets = []
 _scan_progress_sockets = {}
@@ -42,7 +43,7 @@ async def lifespan(app: FastAPI):
     yield
     stop_scheduler()
 
-app = FastAPI(title='SportShield AI', version='2.0.0', lifespan=lifespan)
+app = FastAPI(title='ShieldCore AI', version='2.0.0', lifespan=lifespan)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
@@ -59,13 +60,15 @@ app.include_router(violations_router, prefix="/violations")
 app.include_router(analytics_router, prefix="/analytics")
 app.include_router(crawl_router, prefix="/crawl")
 app.include_router(evidence_router, prefix="/evidence")
+app.include_router(assets_router, prefix="/assets")
 
 @app.get("/")
 async def root():
     return {
-        'name': 'SportShield AI',
+        'name': 'ShieldCore AI',
         'version': '2.0.0',
         'competition': 'Google Solution Challenge 2026',
+        'endpoints': ['/register', '/scan', '/scan/url', '/scan/lite', '/assets', '/violations', '/analytics', '/crawl', '/evidence', '/ws'],
         'status': 'running'
     }
 

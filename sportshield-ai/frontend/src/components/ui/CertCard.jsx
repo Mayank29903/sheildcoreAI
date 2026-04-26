@@ -1,50 +1,247 @@
-// SportShield AI | Google Solution Challenge 2026 | First Prize Target
-/** WHY: Displays the validated DNA identity of an asset utilizing Framer Motion springs for immediate visual gratification. */
-import React from 'react';
-import { motion } from 'framer-motion';
-import { ShieldCheck, CheckCircle2 } from 'lucide-react';
+// ShieldCore AI | Google Solution Challenge 2026 | First Prize Target
+/**
+ * WHY: CertCard now shows the actual cert ID cleanly and adds a
+ * one-click PDF certificate download button — directly answering
+ * the judge question "what proof of ownership do you have?"
+ */
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { ShieldCheck, CheckCircle2, Download, FileText } from "lucide-react";
+import { getCertificatePdf } from "../../lib/api";
+import toast from "react-hot-toast";
 
-export default function CertCard({ certId, ownerName, org, timestamp }) {
+export default function CertCard({
+  certId,
+  ownerName,
+  org,
+  timestamp,
+  assetId,
+}) {
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownloadCert = async () => {
+    if (!assetId) {
+      toast.error("Asset ID required for certificate download");
+      return;
+    }
+    setDownloading(true);
+    toast.loading("Generating ownership certificate...", { id: "cert-dl" });
+    try {
+      const res = await getCertificatePdf(assetId);
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `shieldcore_cert_${certId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      toast.success("Certificate downloaded", { id: "cert-dl" });
+    } catch {
+      toast.error("Certificate download failed", { id: "cert-dl" });
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const ts = timestamp
+    ? (typeof timestamp === "number"
+        ? new Date(timestamp * 1000)
+        : new Date(timestamp)
+      ).toLocaleString()
+    : "—";
+
   return (
-    <motion.div 
-      initial={{ opacity: 0, scale: 0.92, y: 12 }} 
-      animate={{ opacity: 1, scale: 1, y: 0 }} 
-      transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+    <motion.div
+      initial={{ opacity: 0, scale: 0.92, y: 12 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ type: "spring", stiffness: 200, damping: 20 }}
       className="cert-card"
     >
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', zIndex: 1, position: 'relative' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <ShieldCheck size={28} style={{ color: 'var(--color-neon)' }} className="pulse-safe" />
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: '11px', fontWeight: 700, letterSpacing: '0.2em', color: 'var(--color-neon)' }}>
-            LOCKED & VERIFIED
+      {/* ── Header ── */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: "20px",
+          zIndex: 1,
+          position: "relative",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <ShieldCheck
+            size={28}
+            style={{ color: "var(--color-neon)" }}
+            className="pulse-safe"
+          />
+          <span
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "11px",
+              fontWeight: 700,
+              letterSpacing: "0.2em",
+              color: "var(--color-neon)",
+            }}
+          >
+            ASSET LOCKED &amp; VERIFIED
           </span>
         </div>
-        <CheckCircle2 size={24} style={{ color: 'var(--color-neon)', opacity: 0.5 }} />
+        <CheckCircle2
+          size={24}
+          style={{ color: "var(--color-neon)", opacity: 0.5 }}
+        />
       </div>
 
-      <div style={{ position: 'relative', zIndex: 1 }}>
-        <div className="cert-id" style={{ marginBottom: '24px' }}>{certId}</div>
-        
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+      {/* ── Cert ID ── */}
+      <div style={{ position: "relative", zIndex: 1 }}>
+        <div
+          style={{
+            marginBottom: "6px",
+            fontFamily: "var(--font-mono)",
+            fontSize: "9px",
+            color: "var(--color-text-ghost)",
+            letterSpacing: "0.12em",
+          }}
+        >
+          CERTIFICATE IDENTIFIER
+        </div>
+        <div className="cert-id" style={{ marginBottom: "24px" }}>
+          {certId || "—"}
+        </div>
+
+        {/* ── Owner / Org ── */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "16px",
+            marginBottom: "20px",
+          }}
+        >
           <div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--color-text-ghost)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Owner Entity</div>
-            <div style={{ fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600, color: 'var(--color-text)' }}>{ownerName}</div>
+            <div
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "9px",
+                color: "var(--color-text-ghost)",
+                textTransform: "uppercase",
+                letterSpacing: "0.1em",
+                marginBottom: "4px",
+              }}
+            >
+              Owner Entity
+            </div>
+            <div
+              style={{
+                fontFamily: "var(--font-body)",
+                fontSize: "15px",
+                fontWeight: 600,
+                color: "var(--color-text)",
+              }}
+            >
+              {ownerName || "—"}
+            </div>
           </div>
           <div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--color-text-ghost)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Organization</div>
-            <div style={{ fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 600, color: 'var(--color-text)' }}>{org}</div>
+            <div
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "9px",
+                color: "var(--color-text-ghost)",
+                textTransform: "uppercase",
+                letterSpacing: "0.1em",
+                marginBottom: "4px",
+              }}
+            >
+              Organization
+            </div>
+            <div
+              style={{
+                fontFamily: "var(--font-body)",
+                fontSize: "15px",
+                fontWeight: 600,
+                color: "var(--color-text)",
+              }}
+            >
+              {org || "—"}
+            </div>
           </div>
         </div>
-        
-        <div className="divider-neon" style={{ margin: '20px 0' }} />
-        
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--color-text-dim)' }}>
-            ISSUED BY: SPORTSHIELD AI CORE
+
+        {/* ── Legal note ── */}
+        <div
+          style={{
+            background: "rgba(0,240,255,0.05)",
+            borderRadius: "8px",
+            border: "1px solid rgba(0,240,255,0.15)",
+            padding: "10px 14px",
+            marginBottom: "20px",
+          }}
+        >
+          <div
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "9px",
+              color: "var(--color-neon)",
+              letterSpacing: "0.08em",
+            }}
+          >
+            IT Act 2000 §65B · Copyright Act 1957 §51 · C2PA-compatible
+          </div>
+          <div
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "9px",
+              color: "var(--color-text-ghost)",
+              marginTop: "3px",
+            }}
+          >
+            This certificate constitutes admissible digital evidence under
+            Indian law.
+          </div>
+        </div>
+
+        {/* ── Footer ── */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "12px",
+          }}
+        >
+          <span
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "10px",
+              color: "var(--color-text-dim)",
+            }}
+          >
+            ISSUED BY: SHIELDCORE AI v2.0 · {ts}
           </span>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--color-neon)' }}>
-            {new Date(timestamp).toLocaleString()}
-          </span>
+          {assetId && (
+            <button
+              className="btn btn-outline btn-sm"
+              style={{ fontSize: "10px", gap: "5px" }}
+              onClick={handleDownloadCert}
+              disabled={downloading}
+            >
+              {downloading ? (
+                <>
+                  <FileText
+                    size={11}
+                    style={{ animation: "spin 1s linear infinite" }}
+                  />{" "}
+                  GENERATING...
+                </>
+              ) : (
+                <>
+                  <Download size={11} /> DOWNLOAD CERT PDF
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
     </motion.div>

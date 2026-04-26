@@ -1,5 +1,12 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithPopup, signOut, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { initializeApp } from "firebase/app";
+import {
+  getAuth,
+  signInWithPopup,
+  signOut,
+  GoogleAuthProvider,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 import {
   getFirestore,
   collection,
@@ -21,10 +28,19 @@ import {
   Timestamp,
   writeBatch,
   runTransaction,
-  documentId
-} from 'firebase/firestore';
-import { getDatabase, ref, onValue, set, push, update, remove, off } from 'firebase/database';
-import { getStorage } from 'firebase/storage';
+  documentId,
+} from "firebase/firestore";
+import {
+  getDatabase,
+  ref,
+  onValue,
+  set,
+  push,
+  update,
+  remove,
+  off,
+} from "firebase/database";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -33,15 +49,15 @@ const firebaseConfig = {
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
 };
 
-const AUTH_SESSION_STORAGE_KEY = 'sportshield.authSession';
+const AUTH_SESSION_STORAGE_KEY = "sportshield.authSession";
 const GUEST_USER = {
-  uid: 'local-preview-user',
-  displayName: 'Local Preview User',
-  email: 'preview@local.sportshield',
-  isGuest: true
+  uid: "local-preview-user",
+  displayName: "Local Preview User",
+  email: "preview@local.sportshield",
+  isGuest: true,
 };
 
 const app = initializeApp(firebaseConfig);
@@ -62,7 +78,7 @@ export const hasFirebaseClientConfig = [
 ].every(Boolean);
 
 function getStoredSessionUser() {
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return null;
   }
 
@@ -82,12 +98,15 @@ function getStoredSessionUser() {
 let currentUser = getStoredSessionUser();
 
 function setStoredSessionUser(user) {
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return;
   }
 
   if (user) {
-    window.sessionStorage.setItem(AUTH_SESSION_STORAGE_KEY, JSON.stringify(user));
+    window.sessionStorage.setItem(
+      AUTH_SESSION_STORAGE_KEY,
+      JSON.stringify(user),
+    );
   } else {
     window.sessionStorage.removeItem(AUTH_SESSION_STORAGE_KEY);
   }
@@ -106,9 +125,9 @@ function serializeUser(user) {
 
   return {
     uid: user.uid,
-    displayName: user.displayName || user.email || 'Authenticated User',
-    email: user.email || '',
-    isGuest: Boolean(user.isGuest)
+    displayName: user.displayName || user.email || "Authenticated User",
+    email: user.email || "",
+    isGuest: Boolean(user.isGuest),
   };
 }
 
@@ -122,40 +141,44 @@ function getAuthInstance() {
 function getGoogleProvider() {
   if (!googleProvider) {
     googleProvider = new GoogleAuthProvider();
-    googleProvider.setCustomParameters({ prompt: 'select_account' });
+    googleProvider.setCustomParameters({ prompt: "select_account" });
   }
   return googleProvider;
 }
 
 function normalizeAuthError(error) {
-  const code = error?.code || '';
-  const rawMessage = error?.message || '';
+  const code = error?.code || "";
+  const rawMessage = error?.message || "";
 
   if (
-    code === 'auth/configuration-not-found' ||
-    rawMessage.includes('CONFIGURATION_NOT_FOUND')
+    code === "auth/configuration-not-found" ||
+    rawMessage.includes("CONFIGURATION_NOT_FOUND")
   ) {
     const friendly = new Error(
-      'Firebase Authentication is not configured for this project yet. Enable a sign-in provider in Firebase Authentication or use Local Preview.'
+      "Firebase Authentication is not configured for this project yet. Enable a sign-in provider in Firebase Authentication or use Local Preview.",
     );
-    friendly.code = code || 'auth/configuration-not-found';
+    friendly.code = code || "auth/configuration-not-found";
     return friendly;
   }
 
-  if (code === 'auth/unauthorized-domain') {
+  if (code === "auth/unauthorized-domain") {
     const friendly = new Error(
-      'This hostname is not authorized in Firebase Authentication. Add localhost to the authorized domains list.'
+      "This hostname is not authorized in Firebase Authentication. Add localhost to the authorized domains list.",
     );
     friendly.code = code;
     return friendly;
   }
 
-  return error instanceof Error ? error : new Error(rawMessage || 'Authentication failed');
+  return error instanceof Error
+    ? error
+    : new Error(rawMessage || "Authentication failed");
 }
 
 async function ensureFirebaseAuthConfigured() {
   if (!hasFirebaseClientConfig) {
-    throw new Error('Firebase client configuration is incomplete. Check the VITE_FIREBASE_* values in frontend/.env.');
+    throw new Error(
+      "Firebase client configuration is incomplete. Check the VITE_FIREBASE_* values in frontend/.env.",
+    );
   }
 
   if (!authConfigCheckPromise) {
@@ -176,7 +199,10 @@ async function ensureFirebaseAuthConfigured() {
         }
 
         const message = payload?.error?.message || `HTTP ${response.status}`;
-        throw normalizeAuthError({ code: 'auth/configuration-not-found', message });
+        throw normalizeAuthError({
+          code: "auth/configuration-not-found",
+          message,
+        });
       })
       .catch((error) => {
         authConfigCheckPromise = null;
@@ -191,7 +217,10 @@ export const signInWithGoogle = async () => {
   await ensureFirebaseAuthConfigured();
 
   try {
-    const result = await signInWithPopup(getAuthInstance(), getGoogleProvider());
+    const result = await signInWithPopup(
+      getAuthInstance(),
+      getGoogleProvider(),
+    );
     const user = serializeUser(result.user);
     emitAuthChange(user);
     return { user };
@@ -203,7 +232,11 @@ export const signInWithGoogle = async () => {
 export const registerWithEmail = async (email, password, displayName) => {
   await ensureFirebaseAuthConfigured();
   try {
-    const result = await createUserWithEmailAndPassword(getAuthInstance(), email, password);
+    const result = await createUserWithEmailAndPassword(
+      getAuthInstance(),
+      email,
+      password,
+    );
     const user = serializeUser(result.user);
     if (displayName) {
       user.displayName = displayName;
@@ -218,7 +251,11 @@ export const registerWithEmail = async (email, password, displayName) => {
 export const signInWithEmail = async (email, password) => {
   await ensureFirebaseAuthConfigured();
   try {
-    const result = await signInWithEmailAndPassword(getAuthInstance(), email, password);
+    const result = await signInWithEmailAndPassword(
+      getAuthInstance(),
+      email,
+      password,
+    );
     const user = serializeUser(result.user);
     emitAuthChange(user);
     return { user };
@@ -282,5 +319,5 @@ export {
   push,
   update,
   remove,
-  off
+  off,
 };
