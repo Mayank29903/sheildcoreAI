@@ -5,6 +5,7 @@ import ThreatBadge from "../ui/ThreatBadge";
 import { Mail, Globe2 } from "lucide-react";
 import { sendTakedown } from "../../lib/api";
 import toast from "react-hot-toast";
+import DMCAGenerator from "./DMCAGenerator";
 
 export default function ViolationCard({ violation, onTakedownSent }) {
   const isDeepfake = violation.is_deepfake;
@@ -102,7 +103,10 @@ export default function ViolationCard({ violation, onTakedownSent }) {
         </div>
       </div>
 
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
+        {(violation.detection_type === "theft" || violation.detection_type === "both") && (
+          <DMCAGenerator violationId={violation.violation_id} />
+        )}
         <button
           className="btn btn-outline"
           onClick={handleTakedown}

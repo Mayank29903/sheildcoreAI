@@ -9,10 +9,12 @@ import {
   ShieldCheck,
   Database,
   Crosshair,
+  Play,
 } from "lucide-react";
 
 export default function Sidebar() {
   const items = [
+    { to: "/demo", icon: Play, label: "Demo Gallery", highlight: true },
     { to: "/dashboard", icon: Radar, label: "Dashboard" },
     { to: "/scan", icon: Crosshair, label: "Scan" },
     { to: "/violations", icon: AlertTriangle, label: "Alerts" },
@@ -29,13 +31,14 @@ export default function Sidebar() {
           className="pulse-safe"
         />
       </div>
-      {items.map(({ to, icon: Icon, label }) => (
+      {items.map(({ to, icon: Icon, label, highlight }) => (
         <NavLink
           key={to}
           to={to}
           className={({ isActive }) =>
             `sidebar-icon ${isActive ? "active" : ""}`
           }
+          style={highlight ? { color: 'var(--color-neon)', background: 'rgba(0,240,255,0.08)', borderRadius: '8px' } : {}}
         >
           <Icon size={22} />
           <span className="sidebar-tooltip">{label}</span>

@@ -5,6 +5,7 @@
  * Real data from: Firebase RTDB (stats), /analytics (chart), /ws (live feed).
  */
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   LineChart,
@@ -24,6 +25,7 @@ import { getAnalytics } from "../lib/api";
 import StatCard from "../components/ui/StatCard";
 import PropagationMap from "../components/features/PropagationMap";
 import RealtimeFeed from "../components/features/RealtimeFeed";
+import OnboardingModal from "../components/ui/OnboardingModal";
 import {
   ShieldCheck,
   Crosshair,
@@ -32,6 +34,9 @@ import {
   TrendingUp,
   Globe,
   Zap,
+  TrendingUp as TrendingUpIcon,
+  Cpu,
+  Scale,
 } from "lucide-react";
 
 // Custom tooltip for the chart that matches our dark theme
@@ -61,6 +66,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const stats = useDashboardStats();
   const { currentAlert } = useViralAlerts();
   const [analytics, setAnalytics] = useState(null);
@@ -87,6 +93,9 @@ export default function Dashboard() {
       transition={{ duration: 0.3 }}
       style={{ display: "flex", flexDirection: "column", gap: "24px" }}
     >
+      {/* ── ONBOARDING MODAL ── */}
+      <OnboardingModal navigate={navigate} />
+
       {/* ── VIRAL SPREAD BANNER ── */}
       {currentAlert?.is_active && (
         <div className="viral-banner slide-in">
@@ -152,6 +161,111 @@ export default function Dashboard() {
           color="warn"
           prefix="$"
         />
+      </div>
+
+      {/* ── SDG IMPACT METRICS ── */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: "20px",
+        }}
+      >
+        {[
+          {
+            sdg: "SDG 8",
+            title: "RIGHTS VALUE PROTECTED",
+            value: stats.total_value_protected
+              ? `$${Number(stats.total_value_protected).toLocaleString()}`
+              : "$0",
+            icon: TrendingUpIcon,
+            color: "var(--color-neon)",
+            desc: "Decent Work & Economic Growth",
+          },
+          {
+            sdg: "SDG 9",
+            title: "AI SCANS COMPLETED",
+            value: stats.total_scans || 0,
+            icon: Cpu,
+            color: "var(--color-info)",
+            desc: "Industry Innovation & Infrastructure",
+          },
+          {
+            sdg: "SDG 16",
+            title: "VIOLATIONS FLAGGED",
+            value: stats.total_violations || 0,
+            icon: Scale,
+            color: "var(--color-warn)",
+            desc: "Peace, Justice & Strong Institutions",
+          },
+        ].map((item) => (
+          <div
+            key={item.sdg}
+            className="card"
+            style={{ padding: "20px", position: "relative", overflow: "hidden" }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                height: "3px",
+                background: item.color,
+                boxShadow: `0 0 10px ${item.color}`,
+              }}
+            />
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                marginBottom: "12px",
+              }}
+            >
+              <item.icon size={16} style={{ color: item.color }} />
+              <span
+                className="badge badge-neutral"
+                style={{ fontSize: "9px", letterSpacing: "0.1em" }}
+              >
+                {item.sdg}
+              </span>
+            </div>
+            <div
+              style={{
+                fontFamily: "var(--font-display)",
+                fontSize: "28px",
+                fontWeight: 800,
+                color: item.color,
+                textShadow: `0 0 20px ${item.color}40`,
+              }}
+            >
+              {item.value}
+            </div>
+            <div
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "10px",
+                color: "var(--color-text-ghost)",
+                letterSpacing: "0.08em",
+                marginTop: "4px",
+              }}
+            >
+              {item.title}
+            </div>
+            <div
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "9px",
+                color: "var(--color-text-ghost)",
+                marginTop: "8px",
+                opacity: 0.6,
+              }}
+            >
+              {item.desc}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* ── 24HR VIOLATIONS CHART + DOMAINS ── */}

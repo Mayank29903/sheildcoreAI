@@ -6,6 +6,7 @@ import {
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  updateProfile,
 } from "firebase/auth";
 import {
   getFirestore,
@@ -237,10 +238,10 @@ export const registerWithEmail = async (email, password, displayName) => {
       email,
       password,
     );
-    const user = serializeUser(result.user);
     if (displayName) {
-      user.displayName = displayName;
+      await updateProfile(result.user, { displayName });
     }
+    const user = serializeUser(result.user);
     emitAuthChange(user);
     return { user };
   } catch (error) {

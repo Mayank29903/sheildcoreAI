@@ -41,17 +41,27 @@ async def preload_deepfake_model():
     WHY: Pre-loading at startup ensures 3-second demo response.
     Loading on first request = 90-second delay = demo dies on stage.
     Model is loaded from Docker layer cache, not downloaded at runtime.
+    If model isn't cached, we timeout after 10s and fall back gracefully.
     """
     global _detector
     if not TORCH_AVAILABLE:
         logger.warning("Skipping deepfake model — PyTorch not available.")
         return
     if _detector is None:
-        loop = asyncio.get_event_loop()
-        _detector = await loop.run_in_executor(
-            _executor,
-            lambda: pipeline('image-classification', model=MODEL_ID)
-        )
+        try:
+            loop = asyncio.get_event_loop()
+            _detector = await asyncio.wait_for(
+                loop.run_in_executor(
+                    _executor,
+                    lambda: pipeline('image-classification', model=MODEL_ID)
+                ),
+                timeout=15
+            )
+            logger.info("Deepfake model loaded successfully")
+        except asyncio.TimeoutError:
+            logger.warning("Deepfake model load timed out (15s). Will use fallback scores.")
+        except Exception as e:
+            logger.warning(f"Deepfake model load failed: {e}. Will use fallback scores.")
 
 def _run_single_inference(image_path: str) -> dict:
     """

@@ -91,7 +91,7 @@ def init_firebase(required: bool = False) -> bool:
     try:
         cred = _load_credential_source(FIREBASE_CREDENTIALS_JSON)
         firebase_admin.initialize_app(cred, {
-            'storageBucket': os.getenv('FIREBASE_STORAGE_BUCKET', f"{FIREBASE_PROJECT_ID}.appspot.com"),
+            'storageBucket': os.getenv('FIREBASE_STORAGE_BUCKET', f"{FIREBASE_PROJECT_ID}.firebasestorage.app"),
             'databaseURL': os.getenv('FIREBASE_DATABASE_URL', f"https://{FIREBASE_PROJECT_ID}-default-rtdb.asia-southeast1.firebasedatabase.app")
         })
         _firebase_init_attempted = True

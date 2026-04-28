@@ -16,6 +16,7 @@ export default function CertCard({
   org,
   timestamp,
   assetId,
+  blockchainTimestamp,
 }) {
   const [downloading, setDownloading] = useState(false);
 
@@ -201,6 +202,58 @@ export default function CertCard({
           </div>
         </div>
 
+        {/* ── FEAT-004: Blockchain Badge ── */}
+        <div
+          style={{
+            background: blockchainTimestamp?.success
+              ? "rgba(0,240,170,0.06)"
+              : "rgba(255,255,255,0.02)",
+            borderRadius: "8px",
+            border: `1px solid ${blockchainTimestamp?.success ? "rgba(0,240,170,0.2)" : "var(--color-border)"}`,
+            padding: "10px 14px",
+            marginBottom: "20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+          }}
+        >
+          <span style={{ fontSize: "18px" }}>
+            {blockchainTimestamp?.success ? "⛓" : "⏳"}
+          </span>
+          <div>
+            <div
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "10px",
+                fontWeight: 700,
+                letterSpacing: "0.08em",
+                color: blockchainTimestamp?.success
+                  ? "var(--color-neon)"
+                  : "var(--color-text-ghost)",
+              }}
+            >
+              {blockchainTimestamp?.success
+                ? "BLOCKCHAIN VERIFIED"
+                : "Pending blockchain anchor"}
+            </div>
+            {blockchainTimestamp?.success && (
+              <a
+                href={blockchainTimestamp.verification_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "9px",
+                  color: "var(--color-text-ghost)",
+                  textDecoration: "underline",
+                }}
+              >
+                {blockchainTimestamp.blockchain} · {blockchainTimestamp.standard} ·{" "}
+                {blockchainTimestamp.submitted_at?.split("T")[0]}
+              </a>
+            )}
+          </div>
+        </div>
         {/* ── Footer ── */}
         <div
           style={{

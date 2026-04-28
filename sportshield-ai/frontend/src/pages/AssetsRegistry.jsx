@@ -184,6 +184,7 @@ const AssetCard = ({ asset, onCrawl, crawling }) => (
         style={{ flex: 1, fontSize: "10px" }}
         onClick={() => onCrawl(asset.asset_id)}
         disabled={crawling === asset.asset_id}
+        title="Searches the web for unauthorized copies of this asset using Google Custom Search API"
       >
         {crawling === asset.asset_id ? (
           <>
@@ -191,7 +192,7 @@ const AssetCard = ({ asset, onCrawl, crawling }) => (
           </>
         ) : (
           <>
-            <Globe size={11} /> WEB CRAWL
+            <Search size={11} /> HUNT STOLEN COPIES
           </>
         )}
       </button>

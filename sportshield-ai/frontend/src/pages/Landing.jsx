@@ -22,17 +22,40 @@ export default function Landing() {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
 
+  const speakWelcome = (message) => {
+    setTimeout(() => {
+      if ('speechSynthesis' in window) {
+        // Cancel any ongoing speech
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(message);
+        // Cyber/AI voice feel - slowed down for clarity
+        utterance.rate = 0.85;
+        utterance.pitch = 0.95;
+        window.speechSynthesis.speak(utterance);
+      }
+    }, 2300); // 2.3 second delay
+  };
+
   const handleGoogleSignIn = async () => {
     try {
       await signIn();
+      speakWelcome("Welcome back to SportShield");
     } catch (error) {
-      toast.error(error?.message || "Authentication failed");
+      const errMsg = error?.message || "";
+      if (errMsg.includes("not configured") || errMsg.includes("admin-restricted-operation") || errMsg.includes("invalid-api-key")) {
+        toast.success("Auth disabled — redirecting to Local Preview...");
+        await continueAsGuest();
+        speakWelcome("Welcome back to SportShield");
+      } else {
+        toast.error(errMsg || "Authentication failed");
+      }
     }
   };
 
   const handleLocalPreview = async () => {
     try {
       await continueAsGuest();
+      speakWelcome("Welcome back to SportShield");
     } catch (error) {
       toast.error(error?.message || "Local preview unavailable");
     }
@@ -48,9 +71,11 @@ export default function Landing() {
       if (isRegistering) {
         await registerWithEmail(email, password, displayName);
         toast.success("Registration successful");
+        speakWelcome("Welcome to SportShield");
       } else {
         await signInWithEmail(email, password);
         toast.success("Signed in successfully");
+        speakWelcome("Welcome back to SportShield");
       }
     } catch (error) {
       toast.error(error?.message || "Authentication failed");
@@ -279,19 +304,80 @@ export default function Landing() {
         <div
           style={{
             marginTop: "48px",
-            display: "flex",
-            justifyContent: "center",
-            gap: "32px",
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: "16px",
+            maxWidth: "800px",
+            width: "100%",
+            margin: "48px auto 0",
           }}
         >
-          {["SDG 8: DECENT WORK", "SDG 16: STRONG INSTITUTIONS"].map((sdg) => (
-            <span
-              key={sdg}
-              className="badge badge-neutral"
-              style={{ letterSpacing: "0.1em" }}
+          {[
+            {
+              sdg: "SDG 8",
+              title: "Decent Work & Economic Growth",
+              how: "Protects economic rights of sports organizations and athletes by detecting unauthorized redistribution that steals revenue.",
+              color: "var(--color-neon)",
+            },
+            {
+              sdg: "SDG 9",
+              title: "Industry Innovation",
+              how: "Deploys 7-signal AI as accessible SaaS infrastructure. /scan/lite mode supports 2G connections for emerging markets.",
+              color: "var(--color-info)",
+            },
+            {
+              sdg: "SDG 16",
+              title: "Peace, Justice & Strong Institutions",
+              how: "Auto-generates legally admissible evidence PDFs under IT Act 2000 §65B and DMCA notices with blockchain timestamps.",
+              color: "var(--color-warn)",
+            },
+          ].map((item) => (
+            <div
+              key={item.sdg}
+              style={{
+                background: "var(--color-surface)",
+                border: "1px solid var(--color-border)",
+                borderRadius: "12px",
+                padding: "20px",
+                textAlign: "left",
+              }}
             >
-              {sdg}
-            </span>
+              <span
+                className="badge badge-neutral"
+                style={{
+                  fontSize: "9px",
+                  letterSpacing: "0.1em",
+                  marginBottom: "10px",
+                  display: "inline-block",
+                  borderColor: item.color,
+                  color: item.color,
+                }}
+              >
+                {item.sdg}
+              </span>
+              <h4
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "13px",
+                  letterSpacing: "0.05em",
+                  margin: "8px 0 6px",
+                  color: "var(--color-text)",
+                }}
+              >
+                {item.title}
+              </h4>
+              <p
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "10px",
+                  color: "var(--color-text-ghost)",
+                  lineHeight: 1.6,
+                  margin: 0,
+                }}
+              >
+                {item.how}
+              </p>
+            </div>
           ))}
         </div>
       </div>

@@ -18,6 +18,7 @@ const ScanContent = lazy(() => import("./pages/ScanContent"));
 const ViolationsFeed = lazy(() => import("./pages/ViolationsFeed"));
 const EvidenceReport = lazy(() => import("./pages/EvidenceReport"));
 const AssetsRegistry = lazy(() => import("./pages/AssetsRegistry"));
+const DemoGallery    = lazy(() => import("./pages/DemoGallery"));
 
 const PageTransition = ({ children }) => (
   <motion.div
@@ -133,6 +134,7 @@ export default function App() {
             <Route path="/assets" element={wrap(AssetsRegistry)} />
             <Route path="/register" element={wrap(RegisterAsset)} />
             <Route path="/report/:scanId" element={wrap(EvidenceReport)} />
+            <Route path="/demo" element={wrap(DemoGallery)} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

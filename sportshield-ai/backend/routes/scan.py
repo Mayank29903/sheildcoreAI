@@ -81,21 +81,25 @@ async def _process_scan(app, scan_id, temp_path, user_uid, language, file_name, 
         ext = os.path.splitext(temp_path)[1] or '.bin'
         file_url = upload_to_storage(temp_path, f"scans/{scan_id}/upload{ext}")
     except Exception as e:
-        logger.warning(f"Storage upload failed (continuing scan): {e}")
+        logger.warning(f"Storage upload failed (bucket missing or region restricted) - continuing scan locally: {e}")
         file_url = None
 
     try:
         # Step 1
-        df = await run_step_with_timeout(detect_deepfake_video(temp_path) if is_vid else detect_deepfake(temp_path), 30, 'deepfake')
+        df = await run_step_with_timeout(detect_deepfake_video(temp_path) if is_vid else detect_deepfake(temp_path), 10, 'deepfake')
         await app.push_scan_step(scan_id, 'deepfake', 'done', {'is_fake': df.get('is_fake', False), 'confidence': df.get('confidence', 0), 'verdict': df.get('verdict', '')})
 
         # Step 2
-        asy = await run_step_with_timeout(analyze_audio_sync(temp_path), 30, 'audio_sync') if is_vid else {'analyzed': False}
+        asy = await run_step_with_timeout(analyze_audio_sync(temp_path), 10, 'audio_sync') if is_vid else {'analyzed': False}
         if asy.get('is_suspicious') and df.get('is_fake'): df['confidence'] = min(99.0, df['confidence'] + 8.0)
         await app.push_scan_step(scan_id, 'audio_sync', 'done', asy)
 
         # Step 3
-        exf = await loop.run_in_executor(None, analyze_exif, temp_path)
+        try:
+            exf = await loop.run_in_executor(None, analyze_exif, temp_path)
+        except Exception as exif_err:
+            logger.warning(f'EXIF analysis failed: {exif_err}')
+            exf = {'flags': ['EXIF_PARSE_ERROR'], 'risk_score': 15, 'risk_label': 'MEDIUM', 'exif_data': {}, 'summary': 'EXIF analysis failed'}
         await app.push_scan_step(scan_id, 'exif', 'done', {'risk_score': exf.get('risk_score', 0), 'flags': exf.get('flags', [])})
 
         # Step 4
@@ -107,7 +111,7 @@ async def _process_scan(app, scan_id, temp_path, user_uid, language, file_name, 
         await app.push_scan_step(scan_id, 'watermark', 'done', {'found': wmk is not None, 'cert_id': wmk.get('cert_id') if wmk else None})
 
         # Step 6
-        gv = await run_step_with_timeout(analyze_image_with_gemini_vision(temp_path), 30, 'gemini_vision') if not is_vid else STEP_FALLBACKS['gemini_vision']
+        gv = await run_step_with_timeout(analyze_image_with_gemini_vision(temp_path), 10, 'gemini_vision') if not is_vid else STEP_FALLBACKS['gemini_vision']
         await app.push_scan_step(scan_id, 'gemini_vision', 'done', {'manipulation_detected': gv.get('manipulation_detected', False), 'confidence': gv.get('authenticity_confidence', 50)})
 
         dna = calculate_content_dna(df, exf, phm, wmk, gv, temp_path)
@@ -159,7 +163,10 @@ async def _process_scan(app, scan_id, temp_path, user_uid, language, file_name, 
             'gemini_vision_manipulation_detected': gv.get('manipulation_detected'), 'gemini_vision_signals': gv.get('manipulation_signals', []), 'gemini_vision_content_type': gv.get('content_type'), 'gemini_vision_authenticity_confidence': gv.get('authenticity_confidence'), 'gemini_vision_forensic_notes': gv.get('forensic_notes'), 'gemini_legal_report': lr,
             'fact_check_results': fc, 'scan_language': language, 'scan_file_url': file_url, 'scanned_at': firestore.SERVER_TIMESTAMP
         })
-        rtdb.child('dashboard_stats').child('total_scans_today').transaction(lambda c: (c or 0) + 1)
+        try:
+            rtdb.child('dashboard_stats').child('total_scans_today').transaction(lambda c: (c or 0) + 1)
+        except Exception as e:
+            logger.warning(f"RTDB counter update failed (non-fatal): {e}")
         await app.push_scan_step(scan_id, 'complete', 'done', {'scan_id': scan_id, 'trust_score': ts, 'content_dna_score': dna.get('dna_score')})
     finally:
         if os.path.exists(temp_path): os.remove(temp_path)

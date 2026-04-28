@@ -18,8 +18,8 @@ model = None
 
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
-    # We map explicitly to the experimental Flash model capable of blazing multimodal speed.
-    model = genai.GenerativeModel('gemini-2.0-flash-exp')
+    # Use stable production model (gemini-2.0-flash-exp was retired)
+    model = genai.GenerativeModel('gemini-1.5-flash')
 else:
     logger.warning("GEMINI_API_KEY not set. Gemini-powered analysis will use fallback responses.")
 

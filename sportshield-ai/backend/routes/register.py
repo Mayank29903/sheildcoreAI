@@ -16,6 +16,7 @@ from models.exif_forensics import analyze_exif
 from models.phash import generate_fingerprint
 from models.watermark import build_watermark_metadata, embed_watermark
 from config.settings import RIGHTS_VALUE_USD, TMP_DIR
+from services.blockchain_timestamp import submit_to_blockchain
 
 router = APIRouter()
 
@@ -85,12 +86,22 @@ async def register_asset(
         increment_rtdb_counter('dashboard_stats', 'assets_protected', 1)
         rtdb = get_rtdb()
         rtdb.child('dashboard_stats/rights_value_protected_usd').transaction(lambda v: (v or 0) + rights_value)
-        
+
+        # FEAT-004: Blockchain timestamp via OpenTimestamps (free, Bitcoin-anchored)
+        try:
+            ots_result = await submit_to_blockchain(fingerprint['sha256'])
+            db.collection('assets').document(asset_id).update({'blockchain_timestamp': ots_result})
+        except Exception as ots_err:
+            import logging
+            logging.getLogger(__name__).warning(f'Blockchain timestamp failed: {ots_err}')
+            ots_result = {'success': False, 'error': str(ots_err)}
+
         return {
             'cert_id': cert_id, 'asset_id': asset_id, 'phash': fingerprint['phash'],
             'sha256': fingerprint['sha256'], 'original_url': orig_url, 'watermarked_url': wm_url,
             'registered_at': datetime.now(timezone.utc).isoformat(), 'organization': organization,
-            'asset_name': asset_name, 'sport_category': sport_category, 'exif_snapshot': exif_result.get('exif_data', {})
+            'asset_name': asset_name, 'sport_category': sport_category, 'exif_snapshot': exif_result.get('exif_data', {}),
+            'blockchain_timestamp': ots_result
         }
     finally:
         if os.path.exists(tmp_path): os.remove(tmp_path)

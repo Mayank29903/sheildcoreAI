@@ -104,8 +104,108 @@ export default function ScanResults({ scanResult }) {
     }
   };
 
+  // FEAT-003: Determine threat verdict
+  const getVerdict = () => {
+    const isFake = scanResult.deepfake_is_fake;
+    const isMatch = scanResult.asset_match_found;
+    if (isFake && isMatch)
+      return {
+        label: "DUAL THREAT DETECTED",
+        desc: "Deepfake manipulation AND registered asset theft confirmed. Immediate legal action recommended.",
+        color: "var(--color-threat)",
+        bg: "rgba(255,42,42,0.1)",
+        border: "rgba(255,42,42,0.4)",
+        pulse: true,
+      };
+    if (isFake)
+      return {
+        label: "DEEPFAKE DETECTED",
+        desc: "AI-generated or manipulated content detected with high confidence. This may constitute identity fraud under IT Act 66C.",
+        color: "var(--color-threat)",
+        bg: "rgba(255,42,42,0.08)",
+        border: "rgba(255,42,42,0.3)",
+        pulse: false,
+      };
+    if (isMatch)
+      return {
+        label: "IP THEFT DETECTED",
+        desc: "This content matches a registered asset in the ShieldCore registry. Rights chain violation confirmed.",
+        color: "var(--color-warn)",
+        bg: "rgba(255,174,0,0.08)",
+        border: "rgba(255,174,0,0.3)",
+        pulse: false,
+      };
+    return {
+      label: "AUTHENTIC CONTENT",
+      desc: "No deepfake manipulation detected. No registry match found. Content appears legitimate.",
+      color: "var(--color-neon)",
+      bg: "rgba(0,240,255,0.06)",
+      border: "rgba(0,240,255,0.3)",
+      pulse: false,
+    };
+  };
+
+  const verdict = getVerdict();
+
   return (
     <div className="stagger">
+      {/* FEAT-003: Threat Verdict Banner */}
+      <div
+        className={verdict.pulse ? "pulse-threat" : ""}
+        style={{
+          background: verdict.bg,
+          border: `1px solid ${verdict.border}`,
+          borderRadius: "var(--radius-card)",
+          padding: "20px 24px",
+          marginBottom: "24px",
+          display: "flex",
+          alignItems: "center",
+          gap: "16px",
+        }}
+      >
+        <div
+          style={{
+            width: "48px",
+            height: "48px",
+            borderRadius: "12px",
+            background: verdict.bg,
+            border: `1px solid ${verdict.border}`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          <span style={{ fontSize: "24px" }}>
+            {verdict.label.includes("AUTHENTIC") ? "✓" : "⚠"}
+          </span>
+        </div>
+        <div>
+          <h3
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "18px",
+              fontWeight: 800,
+              letterSpacing: "0.1em",
+              color: verdict.color,
+              margin: 0,
+            }}
+          >
+            {verdict.label}
+          </h3>
+          <p
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "11px",
+              color: "var(--color-text-dim)",
+              margin: "4px 0 0",
+            }}
+          >
+            {verdict.desc}
+          </p>
+        </div>
+      </div>
+
       <div
         style={{
           display: "grid",

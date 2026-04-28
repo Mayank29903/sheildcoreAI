@@ -50,6 +50,8 @@ export const sendTakedown = (violationId) =>
   api.post(`/violations/${violationId}/takedown`);
 export const reportUrl = (url, assetId) =>
   api.post("/violations/report-url", { url, asset_id: assetId });
+export const generateDMCA = (violationId, language = "en") =>
+  api.post(`/violations/${violationId}/dmca`, { language });
 
 // ── Analytics & Health ─────────────────────────────────────────
 export const getAnalytics = () => api.get("/analytics/");

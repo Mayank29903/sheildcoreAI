@@ -6,6 +6,7 @@ Judges who wait 5 minutes see scheduler logs fire automatically."""
 import time
 import logging
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from google.cloud.firestore import FieldFilter
 from config.firebase import get_firestore, get_rtdb
 from services.anomaly import check_viral_spread
 
@@ -17,7 +18,7 @@ async def scheduled_viral_check():
     call check_viral_spread() for each. Log execution for demo observability."""
     try:
         db = get_firestore()
-        assets = db.collection('assets').where('total_violations', '>', 0).stream()
+        assets = db.collection('assets').where(filter=FieldFilter('total_violations', '>', 0)).stream()
         count = 0
         for doc in assets:
             data = doc.to_dict()
@@ -44,8 +45,8 @@ async def scheduled_cleanup():
         logger.error(f"Scheduled cleanup failed: {e}")
 
 def start_scheduler():
-    scheduler.add_job(scheduled_viral_check, 'interval', minutes=5, id='viral_check', replace_existing=True)
-    scheduler.add_job(scheduled_cleanup, 'interval', hours=1, id='cleanup', replace_existing=True)
+    scheduler.add_job(scheduled_viral_check, 'interval', minutes=5, id='viral_check', replace_existing=True, misfire_grace_time=None)
+    scheduler.add_job(scheduled_cleanup, 'interval', hours=1, id='cleanup', replace_existing=True, misfire_grace_time=None)
     scheduler.start()
     logger.info("APScheduler started: viral_check=5min, cleanup=1hr")
 

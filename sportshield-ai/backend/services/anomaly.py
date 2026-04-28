@@ -3,6 +3,7 @@
 import time
 import logging
 from datetime import datetime, timedelta, timezone
+from google.cloud.firestore import FieldFilter
 from config.firebase import get_firestore, get_rtdb
 
 logger = logging.getLogger(__name__)
@@ -16,7 +17,7 @@ async def check_viral_spread(asset_id: str, asset_name: str) -> dict:
         one_hr_ago = now - timedelta(hours=1)
         six_hr_ago = now - timedelta(hours=6)
         
-        docs = db.collection('violations').where('asset_id', '==', asset_id).stream()
+        docs = db.collection('violations').where(filter=FieldFilter('asset_id', '==', asset_id)).stream()
         
         last_1hr, last_6hr, total = 0, 0, 0
         timeline = []

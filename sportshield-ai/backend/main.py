@@ -7,6 +7,7 @@ import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
 
@@ -23,6 +24,7 @@ from routes.analytics import router as analytics_router
 from routes.crawl import router as crawl_router
 from routes.evidence import router as evidence_router
 from routes.assets import router as assets_router
+from routes.demo import router as demo_router
 
 _dashboard_sockets = []
 _scan_progress_sockets = {}
@@ -61,6 +63,12 @@ app.include_router(analytics_router, prefix="/analytics")
 app.include_router(crawl_router, prefix="/crawl")
 app.include_router(evidence_router, prefix="/evidence")
 app.include_router(assets_router, prefix="/assets")
+app.include_router(demo_router, prefix="/demo")
+
+# Mount offline demo images
+demo_dir = os.path.join(os.path.dirname(__file__), "DEMO_DATASET")
+if os.path.exists(demo_dir):
+    app.mount("/demo-assets", StaticFiles(directory=demo_dir), name="demo-assets")
 
 @app.get("/")
 async def root():
@@ -118,4 +126,4 @@ async def unprocessable_entity(request, exc):
 
 if __name__ == '__main__':
     import uvicorn
-    uvicorn.run('main:app', host='0.0.0.0', port=8000, reload=True)
+    uvicorn.run('main:app', host='0.0.0.0', port=8000, reload=False, workers=1)

@@ -9,6 +9,7 @@ Blueprint Module 8: GET /assets
 import time
 import logging
 from fastapi import APIRouter, Request
+from google.cloud.firestore import FieldFilter
 from config.firebase import get_firestore
 
 logger = logging.getLogger(__name__)
@@ -35,11 +36,11 @@ async def list_assets(
         query = db.collection('assets')
 
         if user_uid:
-            query = query.where('owner_uid', '==', user_uid)
+            query = query.where(filter=FieldFilter('owner_uid', '==', user_uid))
         if sport_category:
-            query = query.where('sport_category', '==', sport_category)
+            query = query.where(filter=FieldFilter('sport_category', '==', sport_category))
         if status:
-            query = query.where('status', '==', status)
+            query = query.where(filter=FieldFilter('status', '==', status))
 
         docs = query.limit(limit).stream()
         assets = []
