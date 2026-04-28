@@ -134,6 +134,7 @@ const AssetCard = ({ asset, onCrawl, crawling }) => (
           fontWeight: 700,
           color: "var(--color-neon)",
           letterSpacing: "0.1em",
+          wordBreak: "break-all",
         }}
       >
         {asset.cert_id || "—"}
@@ -178,7 +179,7 @@ const AssetCard = ({ asset, onCrawl, crawling }) => (
     </div>
 
     {/* Actions */}
-    <div style={{ display: "flex", gap: "8px", marginTop: "4px" }}>
+    <div style={{ display: "flex", gap: "8px", marginTop: "4px", flexWrap: "wrap" }}>
       <button
         className="btn btn-outline btn-sm"
         style={{ flex: 1, fontSize: "10px" }}
@@ -391,13 +392,7 @@ export default function AssetsRegistry() {
           )}
         </div>
       ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-            gap: "20px",
-          }}
-        >
+        <div className="assets-grid" style={{ gap: "20px" }}>
           <AnimatePresence>
             {filtered.map((a) => (
               <AssetCard

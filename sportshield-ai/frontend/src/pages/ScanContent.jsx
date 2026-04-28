@@ -115,6 +115,8 @@ export default function ScanContent() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          flexWrap: "wrap",
+          gap: "16px",
         }}
       >
         <div>
@@ -149,13 +151,7 @@ export default function ScanContent() {
 
       {/* ── MODE SELECTOR (only when no result) ── */}
       {!scanResult && (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: "14px",
-          }}
-        >
+        <div className="scan-mode-grid" style={{ gap: "14px" }}>
           {MODES.map((m) => {
             const Icon = m.icon;
             const active = mode === m.id;
@@ -264,7 +260,7 @@ export default function ScanContent() {
                     ENTER TARGET URL
                   </span>
                 </div>
-                <div style={{ display: "flex", gap: "12px" }}>
+                <div className="scan-url-row" style={{ display: "flex", gap: "12px" }}>
                   <input
                     type="url"
                     value={urlInput}

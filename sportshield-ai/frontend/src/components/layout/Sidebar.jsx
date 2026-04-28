@@ -24,7 +24,7 @@ export default function Sidebar() {
 
   return (
     <nav className="sidebar">
-      <div style={{ padding: "8px 0", marginBottom: "16px" }}>
+      <div className="sidebar-brand" style={{ padding: "8px 0", marginBottom: "16px" }}>
         <Shield
           size={28}
           style={{ color: "var(--color-neon)" }}
@@ -44,7 +44,7 @@ export default function Sidebar() {
           <span className="sidebar-tooltip">{label}</span>
         </NavLink>
       ))}
-      <div style={{ flex: 1 }} />
+      <div className="sidebar-spacer" style={{ flex: 1 }} />
     </nav>
   );
 }

@@ -204,7 +204,7 @@ export default function ViolationsFeed() {
             </p>
           </div>
         </div>
-        <div style={{ display: "flex", gap: "12px" }}>
+        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
           <button
             className="btn btn-outline btn-sm"
             onClick={handleExportCSV}
@@ -273,7 +273,7 @@ export default function ViolationsFeed() {
             >
               TYPE
             </span>
-            <div style={{ display: "flex", gap: "6px" }}>
+            <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
               {FILTER_TYPES.map((t) => (
                 <button
                   key={t}
@@ -312,7 +312,7 @@ export default function ViolationsFeed() {
             >
               STATUS
             </span>
-            <div style={{ display: "flex", gap: "6px" }}>
+            <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
               {FILTER_STATUS.map((s) => (
                 <button
                   key={s}
@@ -392,13 +392,7 @@ export default function ViolationsFeed() {
         </motion.div>
       ) : (
         <AnimatePresence mode="popLayout">
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(360px, 1fr))",
-              gap: "20px",
-            }}
-          >
+          <div className="violations-grid" style={{ gap: "20px" }}>
             {violations.map((v, i) => (
               <motion.div
                 key={v.violation_id || i}

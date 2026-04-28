@@ -164,13 +164,7 @@ export default function Dashboard() {
       </div>
 
       {/* ── SDG IMPACT METRICS ── */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: "20px",
-        }}
-      >
+      <div className="dashboard-sdg-grid" style={{ gap: "20px" }}>
         {[
           {
             sdg: "SDG 8",
@@ -269,13 +263,7 @@ export default function Dashboard() {
       </div>
 
       {/* ── 24HR VIOLATIONS CHART + DOMAINS ── */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 300px",
-          gap: "24px",
-        }}
-      >
+      <div className="dashboard-chart-grid" style={{ gap: "24px" }}>
         <div className="card">
           <div
             style={{
@@ -563,13 +551,7 @@ export default function Dashboard() {
       </div>
 
       {/* ── MAP + LIVE FEED ── */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 350px",
-          gap: "24px",
-        }}
-      >
+      <div className="dashboard-bottom-grid" style={{ gap: "24px" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
           <div className="card">
             <h4

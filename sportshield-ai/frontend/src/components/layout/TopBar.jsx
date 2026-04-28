@@ -9,8 +9,9 @@ export default function TopBar() {
 
   return (
     <header className="topbar">
-      <div style={{ display: "flex", flexDirection: "column" }}>
+      <div className="topbar-brand" style={{ display: "flex", flexDirection: "column" }}>
         <span
+          className="topbar-brand-mark"
           style={{
             fontFamily: "var(--font-display)",
             fontSize: "16px",
@@ -22,6 +23,7 @@ export default function TopBar() {
           SPORTSHIELD<span style={{ color: "var(--color-neon)" }}>.AI</span>
         </span>
         <span
+          className="topbar-brand-subtitle"
           style={{
             fontFamily: "var(--font-mono)",
             fontSize: "9px",
@@ -37,8 +39,8 @@ export default function TopBar() {
       <div style={{ flex: 1 }} />
 
       {user && (
-        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <div className="topbar-actions" style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <div className="topbar-status" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <span
               style={{
                 width: "8px",
@@ -60,6 +62,7 @@ export default function TopBar() {
             </span>
           </div>
           <div
+            className="topbar-divider"
             style={{
               width: "1px",
               height: "24px",
@@ -67,6 +70,7 @@ export default function TopBar() {
             }}
           />
           <span
+            className="topbar-user"
             style={{
               fontFamily: "var(--font-body)",
               fontSize: "13px",
@@ -76,7 +80,8 @@ export default function TopBar() {
               gap: "6px",
             }}
           >
-            <User size={14} /> {user.displayName || user.email}
+            <User size={14} />
+            <span className="topbar-user-text">{user.displayName || user.email}</span>
           </span>
           <button
             onClick={signOut}

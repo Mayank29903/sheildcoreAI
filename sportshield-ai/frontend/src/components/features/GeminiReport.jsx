@@ -14,6 +14,8 @@ export default function GeminiReport({ report, onLanguageChange }) {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          flexWrap: "wrap",
+          gap: "12px",
           marginBottom: "16px",
         }}
       >
@@ -21,7 +23,7 @@ export default function GeminiReport({ report, onLanguageChange }) {
           <Sparkles size={16} className="pulse-gemini" />
           <span>GEMINI 2.0 FLASH — LEGAL ACTION PLAN</span>
         </div>
-        <div style={{ display: "flex", gap: "8px" }}>
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
           <button
             onClick={() => onLanguageChange("hi")}
             className="btn btn-ghost btn-sm"
@@ -46,7 +48,7 @@ export default function GeminiReport({ report, onLanguageChange }) {
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: "16px", marginBottom: "20px" }}>
+      <div style={{ display: "flex", gap: "16px", marginBottom: "20px", flexWrap: "wrap" }}>
         <ThreatBadge level={report.threat_level} />
         <span
           style={{
@@ -60,13 +62,7 @@ export default function GeminiReport({ report, onLanguageChange }) {
         </span>
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
-          gap: "24px",
-        }}
-      >
+      <div className="gemini-report-grid" style={{ gap: "24px" }}>
         <div>
           <h5
             className="stat-label"

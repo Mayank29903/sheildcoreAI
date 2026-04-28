@@ -4,6 +4,15 @@ Everything needed to make `sportshield-ai` work from zero for the Google Solutio
 
 ---
 
+## Live Deployment
+
+- Frontend: https://shieldcoreai-frontend.onrender.com/
+- Backend API: https://sheildcoreai-dp80.onrender.com/
+- Backend health check: https://sheildcoreai-dp80.onrender.com/health
+- GitHub repository: https://github.com/Mayank29903/SheildCoreAI
+
+---
+
 ## Part 1 - Firebase Console Setup
 
 Go to: https://console.firebase.google.com
@@ -64,7 +73,7 @@ PORT=8000
 ### `sportshield-ai/frontend/.env`
 
 ```env
-VITE_API_URL=http://localhost:8000
+VITE_API_URL=https://sheildcoreai-dp80.onrender.com/
 VITE_FIREBASE_API_KEY=paste_from_firebase_console
 VITE_FIREBASE_AUTH_DOMAIN=sheildcoreai.firebaseapp.com
 VITE_FIREBASE_DATABASE_URL=https://sheildcoreai-default-rtdb.asia-southeast1.firebasedatabase.app

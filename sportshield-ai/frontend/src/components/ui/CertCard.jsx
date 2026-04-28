@@ -111,14 +111,7 @@ export default function CertCard({
         </div>
 
         {/* ── Owner / Org ── */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "16px",
-            marginBottom: "20px",
-          }}
-        >
+        <div className="cert-owner-grid" style={{ gap: "16px", marginBottom: "20px" }}>
           <div>
             <div
               style={{

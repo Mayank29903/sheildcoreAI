@@ -88,7 +88,7 @@ export default function Landing() {
 
   return (
     <div
-      className="page"
+      className="landing-page"
       style={{
         alignItems: "center",
         justifyContent: "center",
@@ -132,7 +132,7 @@ export default function Landing() {
         <h1
           style={{
             fontFamily: "var(--font-display)",
-            fontSize: "48px",
+            fontSize: "clamp(36px, 10vw, 48px)",
             fontWeight: 900,
             letterSpacing: "0.1em",
             marginBottom: "16px",
@@ -302,10 +302,9 @@ export default function Landing() {
         </div>
 
         <div
+          className="landing-sdg-grid"
           style={{
             marginTop: "48px",
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
             gap: "16px",
             maxWidth: "800px",
             width: "100%",

@@ -32,18 +32,9 @@ const PageTransition = ({ children }) => (
 );
 
 const AuthenticatedLayout = ({ children }) => (
-  <div
-    style={{
-      display: "flex",
-      height: "100vh",
-      width: "100vw",
-      overflow: "hidden",
-    }}
-  >
+  <div className="app-shell">
     <Sidebar />
-    <div
-      style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}
-    >
+    <div className="app-main">
       <TopBar />
       <main className="page" style={{ overflowY: "auto" }}>
         <div className="page-content">

@@ -84,6 +84,7 @@ export default function RegisterAsset() {
         style={{
           display: "flex",
           alignItems: "center",
+          flexWrap: "wrap",
           gap: "12px",
           marginBottom: "32px",
         }}
@@ -106,7 +107,7 @@ export default function RegisterAsset() {
           <h2
             style={{
               fontFamily: "var(--font-display)",
-              fontSize: "28px",
+              fontSize: "clamp(22px, 6vw, 28px)",
               fontWeight: 800,
               letterSpacing: "0.05em",
               color: "var(--color-text)",
@@ -262,10 +263,8 @@ export default function RegisterAsset() {
           </div>
 
           <div
-            className="slide-up"
+            className="slide-up register-form-grid"
             style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
               gap: "24px",
               marginBottom: "32px",
             }}

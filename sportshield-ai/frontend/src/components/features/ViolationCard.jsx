@@ -30,6 +30,8 @@ export default function ViolationCard({ violation, onTakedownSent }) {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "flex-start",
+          flexWrap: "wrap",
+          gap: "12px",
           marginBottom: "16px",
         }}
       >
@@ -62,14 +64,7 @@ export default function ViolationCard({ violation, onTakedownSent }) {
 
       <div className="divider" />
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "16px",
-          marginBottom: "16px",
-        }}
-      >
+      <div className="violation-card-meta" style={{ gap: "16px", marginBottom: "16px" }}>
         <div>
           <span
             className="stat-label"
@@ -103,7 +98,7 @@ export default function ViolationCard({ violation, onTakedownSent }) {
         </div>
       </div>
 
-      <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", flexWrap: "wrap" }}>
         {(violation.detection_type === "theft" || violation.detection_type === "both") && (
           <DMCAGenerator violationId={violation.violation_id} />
         )}

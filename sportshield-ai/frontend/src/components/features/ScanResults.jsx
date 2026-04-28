@@ -160,6 +160,7 @@ export default function ScanResults({ scanResult }) {
           marginBottom: "24px",
           display: "flex",
           alignItems: "center",
+          flexWrap: "wrap",
           gap: "16px",
         }}
       >
@@ -206,14 +207,7 @@ export default function ScanResults({ scanResult }) {
         </div>
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(250px, 350px) 1fr",
-          gap: "24px",
-          marginBottom: "24px",
-        }}
-      >
+      <div className="scan-results-hero-grid" style={{ gap: "24px", marginBottom: "24px" }}>
         <div
           className="card"
           style={{
@@ -263,9 +257,7 @@ export default function ScanResults({ scanResult }) {
         </div>
       </div>
 
-      <div
-        style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}
-      >
+      <div className="scan-results-detail-grid" style={{ gap: "24px" }}>
         <ContentDNAChart dnaResult={dnaResult} />
         <EXIFPanel exifResult={exifResult} />
       </div>

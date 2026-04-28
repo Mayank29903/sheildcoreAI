@@ -54,7 +54,7 @@ function LiteResult({ result, onRetryFull }) {
       </div>
 
       {/* Score + verdict */}
-      <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "24px", flexWrap: "wrap" }}>
         <div
           style={{
             width: "80px",
@@ -367,14 +367,7 @@ export default function UploadZone({ onScanComplete, liteMode = false }) {
   };
 
   return (
-    <div
-      className="card scale-reveal"
-      style={{
-        display: "grid",
-        gridTemplateColumns: "minmax(200px, 300px) 1fr",
-        gap: "24px",
-      }}
-    >
+    <div className="card scale-reveal upload-progress-grid" style={{ gap: "24px" }}>
       {/* Preview */}
       <div
         style={{
